@@ -39,13 +39,12 @@ int isprime(long val)
 	return 1;
 }
 
-char* ltoa(long val)
-{
-	static char buf[16] = {0};
-	int i = 14;
+char* ltoa(long val, int base){
+	static char buf[32] = {0};
+	int i = 30;
 
-	for(; val && i; --i, val /= 10)
-		buf[i] = "0123456789"[val % 10];
+	for(; val && i ; --i, val /= base)
+		buf[i] = "0123456789abcdef"[val % base];
 
 	return &buf[i+1];
 }
@@ -60,7 +59,7 @@ int main()
 	ret++;
 
 	for(; i < 9999999999999; i += 2) {
-		buf = ltoa(i);
+		buf = ltoa(i, 10);
 
 		if (buf[12] == buf[0] && buf[11] == buf[1]
 			&& buf[10] == buf[2] && buf[9] == buf[3]
