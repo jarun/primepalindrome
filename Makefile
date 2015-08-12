@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -W -Wall -Werror -O3
+CFLAGS = -Wall -Wextra -Werror -O3
 
 all: primepalindrome
 
