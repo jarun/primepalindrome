@@ -23,6 +23,32 @@
 #include <stdlib.h>
 #include <math.h>
 
+char *ltoa(long val, int base, int *len){
+	static char buf[32] = {0};
+	int i = 30;
+
+	for(; val && i ; --i, val /= base)
+		buf[i] = "0123456789abcdef"[val % base];
+
+	*len = 30 - i;
+
+	return &buf[i+1];
+}
+
+int ispalin(char *buf, int len)
+{
+	int mid = len / 2 - 1;
+
+	while (mid >= 0) {
+		if (buf[mid] != buf[len - mid - 1])
+			return 0;
+
+		mid--;
+	}
+
+	return 1;
+}
+
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
@@ -39,39 +65,29 @@ int isprime(long val)
 	return 1;
 }
 
-char* ltoa(long val, int base){
-	static char buf[32] = {0};
-	int i = 30;
-
-	for(; val && i ; --i, val /= base)
-		buf[i] = "0123456789abcdef"[val % base];
-
-	return &buf[i+1];
-}
-
 int main()
 {
 	int count = 0;
-	char* buf = NULL;
+	char *buf = NULL;
 	long i = 1000000000001;
+	int len = 0;
 
 	int ret = system("date");
 	ret++;
 
 	for(; i < 9999999999999; i += 2) {
-		buf = ltoa(i, 10);
+		buf = ltoa(i, 10, &len);
 
-		if (buf[12] == buf[0] && buf[11] == buf[1]
-			&& buf[10] == buf[2] && buf[9] == buf[3]
-			&& buf[8] == buf[4] && buf[7] == buf[5]
-			&& buf[12] != '5') {
+		if ((buf[len - 1] != '5') && ispalin(buf, len)) {
 			if (isprime(i)) {
 				if (++count == 1500) {
+					count++;
 					ret = system("date");
 					ret++;
-					printf("count: %d val: %s\n", count, buf);
+					printf("%10d. val: %s\n", count, buf);
 					return 0;
-				}
+				} else
+					printf("%10d. val: %s\n", count, buf);
 			}
 		}
 	}
