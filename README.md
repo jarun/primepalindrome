@@ -16,9 +16,11 @@ GPLv3.0
 Thu Jul  2 00:28:26 IST 2015  
 Thu Jul  2 00:32:17 IST 2015  
 count: 1500 val: 1015834385101</pre>
-
+3 minutes 51 seconds  
+  
 <b>With logic to generate next palindrome</b>  
 <pre>$ ./pp
 Tue Oct 27 20:47:32 IST 2015
 Tue Oct 27 20:47:41 IST 2015
   1500. 1015834385101</pre>
+<i>9 seconds!!!</i>
