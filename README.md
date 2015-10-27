@@ -20,7 +20,7 @@ count: 1500 val: 1015834385101</pre>
   
 <b>With logic to generate next palindrome</b>  
 <pre>$ ./pp
-Tue Oct 27 20:47:32 IST 2015
-Tue Oct 27 20:47:41 IST 2015
+Tue Oct 27 22:22:54 IST 2015
+Tue Oct 27 22:23:01 IST 2015
   1500. 1015834385101</pre>
-<i>9 seconds!!!</i>
+<i>7 seconds!!!</i>
