@@ -119,7 +119,7 @@ int main()
 			continue;
 		}
 
-		if ((buf[len - 1] != '5') && ispalin(buf, len)) {
+		if (buf[len - 1] != '5') {
 			if (isprime(i)) {
 				if (++count == LIMIT) {
 					ret = system("date");
