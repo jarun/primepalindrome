@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define LIMIT 1500
+#define _LIMIT_ 1500
 
 char *ltoa(long val, int base, int *len){
 	static char buf[32] = {0};
@@ -86,11 +86,11 @@ int isprime(long val)
 	return 1;
 }
 
-long getnextpalin(char *buf, int len)
+long getnextpalin(char *buf, int *len)
 {
-	int mid = (len >> 1) - 1;
+	int mid = (*len >> 1) - 1;
 
-	if ((len & 0x1) == 0x1) {
+	if ((*len & 0x1) == 0x1) {
 		if (buf[mid + 1] - '0' == 9)
 			buf[mid + 1] = '0';
 		else {
@@ -102,83 +102,93 @@ long getnextpalin(char *buf, int len)
 	while (mid >= 0) {
 		if (buf[mid] - '0' == 9) {
 			buf[mid] = '0';
-			buf[len - mid - 1] = '0';
+			buf[*len - mid - 1] = '0';
 		} else {
 			buf[mid] += 1;
-			buf[len - mid - 1] += 1;
+			buf[*len - mid - 1] += 1;
 			return atol(buf);
 		}
 
 		mid--;
 	}
 
-	/* We have exhausted numbers in len digits,
+	/* We have exhausted numbers in *len digits,
 	   increase the number of digits and return
 	   the first palindrome of the form 10..0..01 */
-	return (long) pow(10, len) | 1;
+	(*len)++;
+	return (long) pow(10, *len - 1) | 1;
 }
 
-#if 0
 long nonpalin2palin(char *buf, int len)
 {
+	long orig;
+	long nextpalin;
 	int mid = (len >> 1) - 1;
 
 	while (mid >= 0) {
 		if (buf[mid] > buf[len - mid - 1]) {
-			buf[len - mid - 1] = buf[mid];
-			//while
+			while (mid >= 0) {
+				buf[len - mid - 1] = buf[mid];
+				mid--;
+			}
 
-		} else {
-			buf[mid] += 1;
-			buf[len - mid - 1] += 1;
 			return atol(buf);
+		} else if (buf[mid] < buf[len - mid - 1]) {
+			orig = atol(buf);
+
+			while (mid >= 0) {
+				buf[len - mid - 1] = buf[mid];
+				mid--;
+			}
+
+			/* Loop for next palindrome greater than original input */
+			while ((nextpalin = getnextpalin(buf, &len)) < orig);
+
+			return nextpalin;
 		}
 
 		mid--;
 	}
 
-	/* We have exhausted numbers in len digits,
-	   increase the number of digits and return
-	   the first palindrome of the form 10..0..01 */
-	return (long) pow(10, len) | 1;
+	/* We should never reach here as
+	   the function is deterministic */
+	return 0;
 }
-#endif
 
 int main()
 {
 	int count = 0;
 	char *buf = NULL;
-	long i = 1000000000001;
-	int len = 0;
+	long i = 1000000000000;
+	//long i = 999999999999;
+	int len = 0, oldlen;
 
 	int ret = system("date");
 	ret++;
 
-#if 0
 	buf = ltoa(i, 10, &len);
 
-	if (ispalin(buf, len))
-	else {
+	if (!ispalin(buf, len)) {
 		/* Get immediate next palindrome after a non-palindrome */
 		i = nonpalin2palin(buf, len);
+
+		/* Need to convert in case the number of digits has changed */
 		buf = ltoa(i, 10, &len);
+		printf("next palin: %s\n", buf);
 	}
-#endif
 
 	while (1) {
-		buf = ltoa(i, 10, &len);
-
 		/* If number of digits are even, all palindromes are divisible by 11.
 		   Get first palindrome of next odd number of digits */
 		if ((len & 0x1) == 0x0) {
 			i = (long) pow(10, len) | 1;
-			//buf = ltoa(i, 10, &len);
+			buf = ltoa(i, 10, &len);
 			continue;
 		}
 
 		if ((buf[len - 1] != '5') && (isdivisibleby3(buf, len) == 0)) {
 			if (isprime(i)) {
-				if (++count == LIMIT) {
+				if (++count == _LIMIT_) {
 					ret = system("date");
 					ret++;
 					printf("%6d. %s\n", count, buf);
@@ -188,8 +198,12 @@ int main()
 			}
 		}
 
-		i = getnextpalin(buf, len);
-		//buf = ltoa(i, 10, &len);
+		oldlen = len;
+
+		i = getnextpalin(buf, &len);
+		/* Refresh buffer if number of digits has changed */
+		if (oldlen != len)
+			buf = ltoa(i, 10, &len);
 	}
 
 	return 0;
