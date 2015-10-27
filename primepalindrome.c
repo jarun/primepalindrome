@@ -121,8 +121,7 @@ long getnextpalin(char *buf, int *len)
 	/* We have exhausted numbers in *len digits,
 	   increase the number of digits and return
 	   the first palindrome of the form 10..0..01 */
-	(*len)++;
-	return (long) pow(10, *len - 1) | 1;
+	return (long) pow(10, (*len)++) | 1;
 }
 
 /* Generate the next palindrome after a NON-palindrome */
