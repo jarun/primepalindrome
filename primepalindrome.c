@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define LIMIT 1500
+
 char *ltoa(long val, int base, int *len){
 	static char buf[32] = {0};
 	int i = 30;
@@ -37,7 +39,7 @@ char *ltoa(long val, int base, int *len){
 
 int ispalin(char *buf, int len)
 {
-	int mid = len / 2 - 1;
+	int mid = (len >> 1) - 1;
 
 	while (mid >= 0) {
 		if (buf[mid] != buf[len - mid - 1])
@@ -52,8 +54,8 @@ int ispalin(char *buf, int len)
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
-	/* if ((val & 0x1) == 0x0)
-		return 0; */
+	if ((val & 0x1) == 0x0)
+		return 0;
 
 	long i = 3;
 	long root = (long) sqrt(val) + 1;
@@ -63,6 +65,38 @@ int isprime(long val)
 			return 0;
 
 	return 1;
+}
+
+long getnextpalin(char *buf, int len)
+{
+	int mid = (len >> 1) - 1;
+
+	if ((len & 0x1) == 0x1) {
+		if (buf[mid + 1] - '0' == 9)
+			buf[mid + 1] = '0';
+		else {
+			buf[mid + 1] += 1;
+			return atol(buf);
+		}
+	}
+
+	while (mid >= 0) {
+		if (buf[mid] - '0' == 9) {
+			buf[mid] = '0';
+			buf[len - mid - 1] = '0';
+		} else {
+			buf[mid] += 1;
+			buf[len - mid - 1] += 1;
+			return atol(buf);
+		}
+
+		mid--;
+	}
+
+	/* We have exhausted numbers in len digits,
+	   increase the number of digits and return
+	   the first palindrome of the form 10..0..01 */
+	return (long) pow(10, len) | 1;
 }
 
 int main()
@@ -75,21 +109,29 @@ int main()
 	int ret = system("date");
 	ret++;
 
-	for(; i < 9999999999999; i += 2) {
+	while (1) {
 		buf = ltoa(i, 10, &len);
+
+		/* If number of digits are even, all palindromes are divisible by 11.
+		   Get first palindrome of next odd number of digits */
+		if ((len & 0x1) == 0x0) {
+			i = (long) pow(10, len) | 1;
+			continue;
+		}
 
 		if ((buf[len - 1] != '5') && ispalin(buf, len)) {
 			if (isprime(i)) {
-				if (++count == 1500) {
-					count++;
+				if (++count == LIMIT) {
 					ret = system("date");
 					ret++;
-					printf("%10d. val: %s\n", count, buf);
+					printf("%6d. %s\n", count, buf);
 					return 0;
-				} else
-					printf("%10d. val: %s\n", count, buf);
+				} /* else
+					printf("%6d. %s\n", count, buf); */
 			}
 		}
+
+		i = getnextpalin(buf, len);
 	}
 
 	return 0;
