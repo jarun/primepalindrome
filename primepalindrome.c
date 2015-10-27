@@ -51,6 +51,19 @@ int ispalin(char *buf, int len)
 	return 1;
 }
 
+int isdivisibleby3(char *buf, int len)
+{
+	int sum = 0;
+
+	while (--len >= 0)
+		sum += buf[len] - '0';
+
+	if (sum % 3)
+		return 0;
+
+	return 1;
+}
+
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
@@ -60,9 +73,15 @@ int isprime(long val)
 	long i = 3;
 	long root = (long) sqrt(val) + 1;
 
-	for (; i < root; i += 2)
+	for (; i < root; i += 2) {
+		/* Skip multiples of 3 as divisors, we have already
+		   checked divisibility by 3 in isdivisibleby3() */
+		if (i % 3 == 0)
+			continue;
+
 		if (!(val % i))
 			return 0;
+	}
 
 	return 1;
 }
@@ -99,6 +118,32 @@ long getnextpalin(char *buf, int len)
 	return (long) pow(10, len) | 1;
 }
 
+#if 0
+long nonpalin2palin(char *buf, int len)
+{
+	int mid = (len >> 1) - 1;
+
+	while (mid >= 0) {
+		if (buf[mid] > buf[len - mid - 1]) {
+			buf[len - mid - 1] = buf[mid];
+			//while
+
+		} else {
+			buf[mid] += 1;
+			buf[len - mid - 1] += 1;
+			return atol(buf);
+		}
+
+		mid--;
+	}
+
+	/* We have exhausted numbers in len digits,
+	   increase the number of digits and return
+	   the first palindrome of the form 10..0..01 */
+	return (long) pow(10, len) | 1;
+}
+#endif
+
 int main()
 {
 	int count = 0;
@@ -109,6 +154,17 @@ int main()
 	int ret = system("date");
 	ret++;
 
+#if 0
+	buf = ltoa(i, 10, &len);
+
+	if (ispalin(buf, len))
+	else {
+		/* Get immediate next palindrome after a non-palindrome */
+		i = nonpalin2palin(buf, len);
+		buf = ltoa(i, 10, &len);
+	}
+#endif
+
 	while (1) {
 		buf = ltoa(i, 10, &len);
 
@@ -116,10 +172,11 @@ int main()
 		   Get first palindrome of next odd number of digits */
 		if ((len & 0x1) == 0x0) {
 			i = (long) pow(10, len) | 1;
+			//buf = ltoa(i, 10, &len);
 			continue;
 		}
 
-		if (buf[len - 1] != '5') {
+		if ((buf[len - 1] != '5') && (isdivisibleby3(buf, len) == 0)) {
 			if (isprime(i)) {
 				if (++count == LIMIT) {
 					ret = system("date");
@@ -132,6 +189,7 @@ int main()
 		}
 
 		i = getnextpalin(buf, len);
+		//buf = ltoa(i, 10, &len);
 	}
 
 	return 0;
