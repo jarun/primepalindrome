@@ -159,7 +159,7 @@ int main()
 {
 	int count = 0;
 	char *buf = NULL;
-	long i = 1000000000000;
+	long i = 1000000000001;
 	//long i = 999999999999;
 	int len = 0, oldlen;
 
