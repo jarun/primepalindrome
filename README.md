@@ -1,6 +1,7 @@
 # PrimePalindrome  
   
 A fast C program to calculate the 1500th prime palindrome with 13 digits.  
+Why 13 digits? Because a palindromic number with even number of digits is always divisible by 11.
   
 # Execution time  
   
