@@ -25,6 +25,7 @@
 
 #define _LIMIT_ 1500
 
+/* Convert long to ASCII */
 char *ltoa(long val, int base, int *len){
 	static char buf[32] = {0};
 	int i = 30;
@@ -37,6 +38,7 @@ char *ltoa(long val, int base, int *len){
 	return &buf[i+1];
 }
 
+/* Check if a number (converted to string) is palindrome */
 int ispalin(char *buf, int len)
 {
 	int mid = (len >> 1) - 1;
@@ -51,6 +53,7 @@ int ispalin(char *buf, int len)
 	return 1;
 }
 
+/* Check if a number (converted to string) is divisible by 3 */
 int isdivisibleby3(char *buf, int len)
 {
 	int sum = 0;
@@ -64,6 +67,8 @@ int isdivisibleby3(char *buf, int len)
 	return 1;
 }
 
+/* Check if a number if prime.  SKIPs the check for 3 due to an
+   earlier check done specifically for this program */
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
@@ -86,6 +91,7 @@ int isprime(long val)
 	return 1;
 }
 
+/* Generate the next palindrome after a palindrome */
 long getnextpalin(char *buf, int *len)
 {
 	int mid = (*len >> 1) - 1;
@@ -119,6 +125,7 @@ long getnextpalin(char *buf, int *len)
 	return (long) pow(10, *len - 1) | 1;
 }
 
+/* Generate the next palindrome after a NON-palindrome */
 long nonpalin2palin(char *buf, int len)
 {
 	long orig;
