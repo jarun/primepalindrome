@@ -67,7 +67,7 @@ int isdivisibleby3(char *buf, int len)
 	return 1;
 }
 
-/* Check if a number if prime.  SKIPs the check for 3 due to an
+/* Check if a number is prime.  _SKIP_s the check for 3 due to an
    earlier check done specifically for this program */
 int isprime(long val)
 {
