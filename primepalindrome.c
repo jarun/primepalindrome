@@ -91,11 +91,19 @@ int isprime(long val)
 	return 1;
 }
 
-/* Generate the next palindrome after a palindrome */
+/* Generate the next palindrome after a palindrome
+   123454321 -> 123464321
+   123494321 -> 123505321
+   123999321 -> 124000421
+   ... */
 long getnextpalin(char *buf, int *len)
 {
 	int mid = (*len >> 1) - 1;
 
+	/* Handle the case of odd number of digits.
+	   If the central digit is 9 reset it to 0
+	   and process adjacent digit, otherwise
+	   increment it and return */
 	if ((*len & 0x1) == 0x1) {
 		if (buf[mid + 1] - '0' == 9)
 			buf[mid + 1] = '0';
@@ -105,6 +113,7 @@ long getnextpalin(char *buf, int *len)
 		}
 	}
 
+	/* Adjust other digits */
 	while (mid >= 0) {
 		if (buf[mid] - '0' == 9) {
 			buf[mid] = '0';
@@ -133,6 +142,7 @@ long nonpalin2palin(char *buf, int len)
 
 	while (mid >= 0) {
 		if (buf[mid] > buf[len - mid - 1]) {
+			/* 126454378 -> 126454621 */
 			while (mid >= 0) {
 				buf[len - mid - 1] = buf[mid];
 				mid--;
@@ -140,6 +150,7 @@ long nonpalin2palin(char *buf, int len)
 
 			return atol(buf);
 		} else if (buf[mid] < buf[len - mid - 1]) {
+			/* 123454678 -> 123454321 (smaller) */
 			orig = atol(buf);
 
 			while (mid >= 0) {
