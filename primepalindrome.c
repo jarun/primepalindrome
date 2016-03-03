@@ -68,8 +68,11 @@ int isdivisibleby3(char *buf, int len)
 	return 1;
 }
 
-/* Check if a number is prime.  _SKIP_s the check for 3 due to an
-   earlier check done specifically for this program */
+/* Check if a number is prime.
+
+   _SKIP_s the check for 3, 5 and every
+   2nd multiple of 3 from 3 due to an earlier
+   check done specifically for this program */
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
@@ -79,11 +82,15 @@ int isprime(long val)
 	long i = 3;
 	long root = (long) sqrt(val) + 1;
 
+	int j = 0;
+
 	for (; i < root; i += 2) {
-		/* Skip multiples of 3 as divisors, we have already
-		   checked divisibility by 3 in isdivisibleby3() */
-		if (i % 3 == 0)
+		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
+		if (j == 3) {
+			j = 1;
 			continue;
+		}
+		j++;
 
 		if (!(val % i))
 			return 0;
@@ -208,6 +215,7 @@ int main()
 			continue;
 		}
 
+		/* Check if number is divisible by 5 or 3 */
 		if ((buf[len - 1] != '5') && (isdivisibleby3(buf, len) == 0)) {
 			if (isprime(i)) {
 				if (--count == 0) {
