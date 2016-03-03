@@ -26,17 +26,20 @@
 #define __LIMIT__ 1500
 #define __COMPLETE__ 0
 
+char ascbuf[32];
+
 /* Convert long to ASCII */
 char *ltoa(long val, int base, int *len){
-	static char buf[32] = {0};
 	int i = 30;
 
+	ascbuf[31] = '\0';
+
 	for(; val && i ; --i, val /= base)
-		buf[i] = "0123456789abcdef"[val % base];
+		ascbuf[i] = "0123456789abcdef"[val % base];
 
 	*len = 30 - i;
 
-	return &buf[i+1];
+	return &ascbuf[i+1];
 }
 
 /* Check if a number (converted to string) is palindrome */
@@ -138,6 +141,7 @@ long getnextpalin(char *buf, int *len)
 	return (long) pow(10, (*len)++) | 1;
 }
 
+#if __COMPLETE__
 /* Generate the next palindrome after a NON-palindrome */
 long nonpalin2palin(char *buf, int len)
 {
@@ -176,6 +180,7 @@ long nonpalin2palin(char *buf, int len)
 	   the function is deterministic */
 	return 0;
 }
+#endif
 
 int main()
 {
