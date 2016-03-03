@@ -41,13 +41,13 @@ char *ltoa(long val, int base, int *len){
 /* Check if a number (converted to string) is palindrome */
 int ispalin(char *buf, int len)
 {
-	int mid = (len >> 1) - 1;
+	int midindex = (len >> 1) - 1;
 
-	while (mid >= 0) {
-		if (buf[mid] != buf[len - mid - 1])
+	while (midindex >= 0) {
+		if (buf[midindex] != buf[len - midindex - 1])
 			return 0;
 
-		mid--;
+		midindex--;
 	}
 
 	return 1;
@@ -98,33 +98,33 @@ int isprime(long val)
    ... */
 long getnextpalin(char *buf, int *len)
 {
-	int mid = (*len >> 1) - 1;
+	int midindex = (*len >> 1) - 1;
 
 	/* Handle the case of odd number of digits.
 	   If the central digit is 9 reset it to 0
 	   and process adjacent digit, otherwise
 	   increment it and return */
 	if ((*len & 0x1) == 0x1) {
-		if (buf[mid + 1] - '0' == 9)
-			buf[mid + 1] = '0';
+		if (buf[midindex + 1] - '0' == 9)
+			buf[midindex + 1] = '0';
 		else {
-			buf[mid + 1] += 1;
+			buf[midindex + 1] += 1;
 			return atol(buf);
 		}
 	}
 
 	/* Adjust other digits */
-	while (mid >= 0) {
-		if (buf[mid] - '0' == 9) {
-			buf[mid] = '0';
-			buf[*len - mid - 1] = '0';
+	while (midindex >= 0) {
+		if (buf[midindex] - '0' == 9) {
+			buf[midindex] = '0';
+			buf[*len - midindex - 1] = '0';
 		} else {
-			buf[mid] += 1;
-			buf[*len - mid - 1] += 1;
+			buf[midindex] += 1;
+			buf[*len - midindex - 1] += 1;
 			return atol(buf);
 		}
 
-		mid--;
+		midindex--;
 	}
 
 	/* We have exhausted numbers in *len digits,
@@ -138,24 +138,24 @@ long nonpalin2palin(char *buf, int len)
 {
 	long orig;
 	long nextpalin;
-	int mid = (len >> 1) - 1;
+	int midindex = (len >> 1) - 1;
 
-	while (mid >= 0) {
-		if (buf[mid] > buf[len - mid - 1]) {
+	while (midindex >= 0) {
+		if (buf[midindex] > buf[len - midindex - 1]) {
 			/* 126454378 -> 126454621 */
-			while (mid >= 0) {
-				buf[len - mid - 1] = buf[mid];
-				mid--;
+			while (midindex >= 0) {
+				buf[len - midindex - 1] = buf[midindex];
+				midindex--;
 			}
 
 			return atol(buf);
-		} else if (buf[mid] < buf[len - mid - 1]) {
+		} else if (buf[midindex] < buf[len - midindex - 1]) {
 			/* 123454678 -> 123454321 (smaller) */
 			orig = atol(buf);
 
-			while (mid >= 0) {
-				buf[len - mid - 1] = buf[mid];
-				mid--;
+			while (midindex >= 0) {
+				buf[len - midindex - 1] = buf[midindex];
+				midindex--;
 			}
 
 			/* Loop for next palindrome greater than original input */
@@ -164,7 +164,7 @@ long nonpalin2palin(char *buf, int len)
 			return nextpalin;
 		}
 
-		mid--;
+		midindex--;
 	}
 
 	/* We should never reach here as
