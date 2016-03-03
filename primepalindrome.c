@@ -69,10 +69,7 @@ int isdivisibleby3(char *buf, int len)
 }
 
 /* Check if a number is prime.
-
-   _SKIP_s the check for 3, 5 and every
-   2nd multiple of 3 from 3 due to an earlier
-   check done specifically for this program */
+   _SKIP_s the check for every odd multiple of 3 */
 int isprime(long val)
 {
 	/* Test for divisibility by 2 */
