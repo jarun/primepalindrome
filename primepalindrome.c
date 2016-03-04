@@ -138,7 +138,10 @@ long getnextpalin(char *buf, int *len)
 	/* We have exhausted numbers in *len digits,
 	   increase the number of digits and return
 	   the first palindrome of the form 10..0..01 */
-	return (long) pow(10, (*len)++) | 1;
+	/* return (long) pow(10, ++(*len)) | 1; */
+
+	/* The last palin will always be of the form 99...99 */
+	return atol(buf) + 2;
 }
 
 #if __COMPLETE__
