@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -O3 -static -march=native
+CFLAGS = -Wall -Wextra -Werror -O3 -march=native
 
 all: primepalindrome
 

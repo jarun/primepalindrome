@@ -39,7 +39,7 @@ char *ltoa(long val, int base, int *len){
 
 	*len = 30 - i;
 
-	return &ascbuf[i+1];
+	return &ascbuf[++i];
 }
 
 /* Check if a number (converted to string) is palindrome */
@@ -80,9 +80,8 @@ int isprime(long val)
 		return 0;
 
 	long i = 3;
-	long root = (long) sqrt(val) + 1;
-
 	int j = 0;
+	long root = (long) sqrt(val) + 1;
 
 	for (; i < root; i += 2) {
 		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
