@@ -1,5 +1,5 @@
 /*
- * A fast C program to calculate the 1500th prime palindrome with 13 digits. 
+ * A fast C program to calculate the 1500th prime palindrome with 13 digits.
  *
  * Author: Arun Prakash Jana <engineerarun@gmail.com>
  * Copyright (C) 2015 by Arun Prakash Jana <engineerarun@gmail.com>
@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Fun-Projects.  If not, see <http://www.gnu.org/licenses/>.
+ * along with primepalindrome.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>

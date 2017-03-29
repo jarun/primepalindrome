@@ -3,10 +3,6 @@
 A fast C program to calculate the 1500th prime palindrome with 13 digits.
 Why 13 digits? Because a palindromic number with even number of digits is always divisible by 11.
 
-## License
-
-GPLv3.0
-
 ## Execution time
 
 /* On Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz */
@@ -35,3 +31,9 @@ GPLv3.0
     1015834385101
     5.86user 0.00system 0:05.86elapsed 100%CPU (0avgtext+0avgdata 2020maxresident)k
     0inputs+0outputs (0major+420minor)pagefaults 0swaps
+
+## License & Copyright
+
+GPLv3.0
+
+Copyright (C) 2015 [Arun Prakash Jana](mailto:engineerarun@gmail.com)
