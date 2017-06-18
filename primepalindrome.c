@@ -25,41 +25,47 @@
 #define __LIMIT__ 1500
 #define __COMPLETE__ 0
 
-char ascbuf[32];
+static char ascbuf[32] = {0};
+static char const hexbuf[] = "0123456789abcdef";
+static int midindex;
 
 /* Convert long to ASCII */
 char *ltoa(long val, int base, int *len){
-	int i = 30;
+	static int i;
 
-	ascbuf[31] = '\0';
+	i = 30;
 
 	for(; val && i ; --i, val /= base)
-		ascbuf[i] = "0123456789abcdef"[val % base];
+		ascbuf[i] = hexbuf[val % base];
 
 	*len = 30 - i;
 
 	return &ascbuf[++i];
 }
 
+#if __COMPLETE__
 /* Check if a number (converted to string) is palindrome */
 int ispalin(char *buf, int len)
 {
-	int midindex = (len >> 1) - 1;
+	midindex = (len >> 1) - 1;
 
 	while (midindex >= 0) {
 		if (buf[midindex] != buf[len - midindex - 1])
 			return 0;
 
-		midindex--;
+		--midindex;
 	}
 
 	return 1;
 }
+#endif
 
 /* Check if a number (converted to string) is divisible by 3 */
 int isdivisibleby3(char *buf, int len)
 {
-	int sum = 0;
+	static int sum;
+
+	sum = 0;
 
 	while (--len >= 0)
 		sum += buf[len] - '0';
@@ -78,9 +84,12 @@ int isprime(long val)
 	if ((val & 0x1) == 0x0)
 		return 0;
 
-	long i = 3;
-	int j = 0;
-	long root = (long) sqrt(val) + 1;
+	static long i, root;
+	static int j;
+
+	i = 3;
+	j = 0;
+	root = (long) sqrt(val) + 1;
 
 	for (; i < root; i += 2) {
 		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
@@ -88,7 +97,7 @@ int isprime(long val)
 			j = 1;
 			continue;
 		}
-		j++;
+		++j;
 
 		if (!(val % i))
 			return 0;
@@ -104,7 +113,7 @@ int isprime(long val)
    ... */
 long getnextpalin(char *buf, int *len)
 {
-	int midindex = (*len >> 1) - 1;
+	midindex = (*len >> 1) - 1;
 
 	/* Handle the case of odd number of digits.
 	   If the central digit is 9 reset it to 0
@@ -130,7 +139,7 @@ long getnextpalin(char *buf, int *len)
 			return atol(buf);
 		}
 
-		midindex--;
+		--midindex;
 	}
 
 	/* We have exhausted numbers in *len digits,
@@ -146,26 +155,26 @@ long getnextpalin(char *buf, int *len)
 /* Generate the next palindrome after a NON-palindrome */
 long nonpalin2palin(char *buf, int len)
 {
-	long orig;
-	long nextpalin;
-	int midindex = (len >> 1) - 1;
+	midindex = (len >> 1) - 1;
 
 	while (midindex >= 0) {
 		if (buf[midindex] > buf[len - midindex - 1]) {
 			/* 126454378 -> 126454621 */
 			while (midindex >= 0) {
 				buf[len - midindex - 1] = buf[midindex];
-				midindex--;
+				--midindex;
 			}
 
 			return atol(buf);
 		} else if (buf[midindex] < buf[len - midindex - 1]) {
+			static long orig, nextpalin;
+
 			/* 123454678 -> 123454321 (smaller) */
 			orig = atol(buf);
 
 			while (midindex >= 0) {
 				buf[len - midindex - 1] = buf[midindex];
-				midindex--;
+				--midindex;
 			}
 
 			/* Loop for next palindrome greater than original input */
@@ -174,7 +183,7 @@ long nonpalin2palin(char *buf, int len)
 			return nextpalin;
 		}
 
-		midindex--;
+		--midindex;
 	}
 
 	/* We should never reach here as
@@ -186,15 +195,10 @@ long nonpalin2palin(char *buf, int len)
 int main()
 {
 	int count = __LIMIT__;
-	char *buf = NULL;
 	long i = 1000000000001;
 	//long i = 999999999999;
 	int len = 0, oldlen;
-
-	int ret = system("date");
-	ret++;
-
-	buf = ltoa(i, 10, &len);
+	char *buf = ltoa(i, 10, &len);
 
 	/* Uncomment the following code if starting from
 	   a non-palindrome. We started at 1000000000001. */
@@ -222,8 +226,6 @@ int main()
 		if ((buf[len - 1] != '5') && (isdivisibleby3(buf, len) == 0)) {
 			if (isprime(i)) {
 				if (--count == 0) {
-					ret = system("date");
-					ret++;
 					printf("%s\n", buf);
 					return 0;
 				} /* else
