@@ -25,12 +25,44 @@
 #define __LIMIT__ 1500
 #define __COMPLETE__ 0
 
+typedef unsigned long long ull;
+
 static char ascbuf[32] = {0};
 static char const hexbuf[] = "0123456789abcdef";
 static int midindex;
 
+static ull fastpow10(int n)
+{
+	if (n < 0 || n > 16) {
+		printf("n = %d\n", n);
+		exit(1);
+	}
+
+	static ull pow10[] = {
+		1,
+		10,
+		100,
+		1000,
+		10000,
+		100000,
+		1000000,
+		10000000,
+		100000000,
+		1000000000,
+		10000000000,
+		100000000000,
+		1000000000000,
+		10000000000000,
+		100000000000000,
+		1000000000000000,
+		10000000000000000,
+	};
+
+	return pow10[n];
+}
+
 /* Convert long to ASCII */
-static char *ltoa(long val, int base, int *len){
+static char *ltoa(ull val, int base, int *len){
 	static int i;
 
 	i = 30;
@@ -78,18 +110,18 @@ static int isdivisibleby3(char *buf, int len)
 
 /* Check if a number is prime.
    _SKIP_s the check for every odd multiple of 3 */
-static int isprime(long val)
+static int isprime(ull val)
 {
-	static long i, root;
+	static ull i, root;
 	static int j;
 
 	/* Test for divisibility by 2 */
-	if ((val & 0x1) == 0x0)
+	if (!(val & 0x1))
 		return 0;
 
 	i = 3;
 	j = 0;
-	root = (long) sqrt(val) + 1;
+	root = (ull) sqrt(val) + 1;
 
 	for (; i < root; i += 2) {
 		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
@@ -111,7 +143,7 @@ static int isprime(long val)
    123494321 -> 123505321
    123999321 -> 124000421
    ... */
-static long getnextpalin(char *buf, int *len)
+static ull getnextpalin(char *buf, int *len)
 {
 	midindex = (*len >> 1) - 1;
 
@@ -145,7 +177,7 @@ static long getnextpalin(char *buf, int *len)
 	/* We have exhausted numbers in *len digits,
 	   increase the number of digits and return
 	   the first palindrome of the form 10..0..01 */
-	/* return (long) pow(10, ++(*len)) | 1; */
+	/* return (ull) fastpow10(++(*len)) | 1; */
 
 	/* The last palin will always be of the form 99...99 */
 	return atol(buf) + 2;
@@ -153,7 +185,7 @@ static long getnextpalin(char *buf, int *len)
 
 #if __COMPLETE__
 /* Generate the next palindrome after a NON-palindrome */
-static long nonpalin2palin(char *buf, int len)
+static ull nonpalin2palin(char *buf, int len)
 {
 	midindex = (len >> 1) - 1;
 
@@ -167,7 +199,7 @@ static long nonpalin2palin(char *buf, int len)
 
 			return atol(buf);
 		} else if (buf[midindex] < buf[len - midindex - 1]) {
-			static long orig, nextpalin;
+			static ull orig, nextpalin;
 
 			/* 123454678 -> 123454321 (smaller) */
 			orig = atol(buf);
@@ -195,8 +227,8 @@ static long nonpalin2palin(char *buf, int len)
 int main()
 {
 	int count = __LIMIT__;
-	long i = 1000000000001;
-	//long i = 999999999999;
+	ull i = 1000000000001;
+	//ull i = 999999999999;
 	int len = 0, oldlen;
 	char *buf = ltoa(i, 10, &len);
 
@@ -216,8 +248,8 @@ int main()
 	while (1) {
 		/* If number of digits are even, all palindromes are divisible by 11.
 		   Get first palindrome of next odd number of digits */
-		if ((len & 0x1) == 0x0) {
-			i = (long) pow(10, len) | 1;
+		if (!(len & 0x1)) {
+			i = (ull) fastpow10(len) | 1;
 			buf = ltoa(i, 10, &len);
 			continue;
 		}
