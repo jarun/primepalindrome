@@ -30,12 +30,12 @@ static char const hexbuf[] = "0123456789abcdef";
 static int midindex;
 
 /* Convert long to ASCII */
-char *ltoa(long val, int base, int *len){
+static char *ltoa(long val, int base, int *len){
 	static int i;
 
 	i = 30;
 
-	for(; val && i ; --i, val /= base)
+	for (; val && i ; --i, val /= base)
 		ascbuf[i] = hexbuf[val % base];
 
 	*len = 30 - i;
@@ -45,7 +45,7 @@ char *ltoa(long val, int base, int *len){
 
 #if __COMPLETE__
 /* Check if a number (converted to string) is palindrome */
-int ispalin(char *buf, int len)
+static int ispalin(char *buf, int len)
 {
 	midindex = (len >> 1) - 1;
 
@@ -61,7 +61,7 @@ int ispalin(char *buf, int len)
 #endif
 
 /* Check if a number (converted to string) is divisible by 3 */
-int isdivisibleby3(char *buf, int len)
+static int isdivisibleby3(char *buf, int len)
 {
 	static int sum;
 
@@ -78,14 +78,14 @@ int isdivisibleby3(char *buf, int len)
 
 /* Check if a number is prime.
    _SKIP_s the check for every odd multiple of 3 */
-int isprime(long val)
+static int isprime(long val)
 {
+	static long i, root;
+	static int j;
+
 	/* Test for divisibility by 2 */
 	if ((val & 0x1) == 0x0)
 		return 0;
-
-	static long i, root;
-	static int j;
 
 	i = 3;
 	j = 0;
@@ -111,7 +111,7 @@ int isprime(long val)
    123494321 -> 123505321
    123999321 -> 124000421
    ... */
-long getnextpalin(char *buf, int *len)
+static long getnextpalin(char *buf, int *len)
 {
 	midindex = (*len >> 1) - 1;
 
@@ -153,7 +153,7 @@ long getnextpalin(char *buf, int *len)
 
 #if __COMPLETE__
 /* Generate the next palindrome after a NON-palindrome */
-long nonpalin2palin(char *buf, int len)
+static long nonpalin2palin(char *buf, int len)
 {
 	midindex = (len >> 1) - 1;
 
