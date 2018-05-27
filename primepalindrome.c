@@ -113,23 +113,32 @@ static int isdivisibleby3(char *buf, int len)
 static int isprime(ull val)
 {
 	static ull i, root;
-	static int j;
+	static ulong j, k;
 
 	/* Test for divisibility by 2 */
 	if (!(val & 0x1))
 		return 0;
 
-	i = 3;
-	j = 0;
+	i = 7; /* divisibility by 3 has already been checked before calling this function */
+	j = 1; /* j can be 0, 1, 2; e.g.: 3 - set to 0, 5 - 1, 7 - 2, 9 - j found as 2 and reset */
+	k = 0; /* k can be 0, 1, 2, 3, 4; e.g.: 5 - set to 0, 7 - 1, 9 - 2, 11 - 3, 13 - 4, 15 - k found as 4 and reset */
 	root = (ull) sqrt(val) + 1;
 
 	for (; i < root; i += 2) {
 		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
-		if (j == 3) {
-			j = 1;
+		if (j == 2) {
+			j = 0;
+			k == 4 ? k = 0 : ++k;
 			continue;
 		}
 		++j;
+
+		/* Trick to skip each 2nd multiple of 5 from 5: 15, 25, 35... */
+		if (k == 4) {
+			k = 0;
+			continue;
+		}
+		++k;
 
 		if (!(val % i))
 			return 0;
@@ -228,9 +237,13 @@ int main()
 {
 	int count = __LIMIT__;
 	ull i = 1000000000001;
-	//ull i = 999999999999;
 	int len = 0, oldlen;
 	char *buf = ltoa(i, 10, &len);
+
+	if (len < 11) {
+		printf("len: %d\n", len);
+		exit(1);
+	}
 
 	/* Uncomment the following code if starting from
 	   a non-palindrome. We started at 1000000000001. */
