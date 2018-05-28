@@ -1,6 +1,12 @@
 /*
  * A fast C program to calculate the 1500th prime palindrome with 13 digits.
  *
+ * Implements brute-force and optimized Sieve of Eratosthenes method.
+ *
+ * Benchmark on Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz:
+ * - Brute: 3.75user 0.00system 0:03.75elapsed 100%CPU (0avgtext+0avgdata 1544maxresident)k
+ * - Sieve: 7.70user 0.00system 0:07.70elapsed 100%CPU (0avgtext+0avgdata 1856maxresident)k
+ *
  * Author: Arun Prakash Jana <engineerarun@gmail.com>
  * Copyright (C) 2015 by Arun Prakash Jana <engineerarun@gmail.com>
  *
@@ -18,48 +24,145 @@
  * along with primepalindrome.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <string.h>
 
-#define __LIMIT__ 1500
-#define __COMPLETE__ 0
+#define __SIEVE__ 0 /* 0 - Brute Force, 1 - Sieve of Eratosthenes */
+#define __COMPLETE__ 0 /* Start from a non-palindrome and generate the next palindrome */
+
+#define __DIGITS__ 13
+#define __LIMIT__  1500
+
+#define PRIME 0
+#define COMPOSITE 1
 
 typedef unsigned long long ull;
 
-static char ascbuf[32] = {0};
 static char const hexbuf[] = "0123456789abcdef";
+static char ascbuf[32] = {0};
+static ull pow10[] = {
+	1,
+	10,
+	100,
+	1000,
+	10000,
+	100000,
+	1000000,
+	10000000,
+	100000000,
+	1000000000,
+	10000000000,
+	100000000000,
+	1000000000000,
+	10000000000000,
+	100000000000000,
+	1000000000000000,
+	10000000000000000,
+};
 static int midindex;
+
+#if __SIEVE__
+static unsigned char *psieve;
+static ull max;
+
+#define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
+#define ALIGN(x,a)              __ALIGN_MASK(x,(typeof(x))(a)-1)
+#endif
 
 static ull fastpow10(int n)
 {
 	if (n < 0 || n > 16) {
+#if __SIEVE__
+		if (psieve)
+			free(psieve);
+#endif
 		printf("n = %d\n", n);
 		exit(1);
 	}
 
-	static ull pow10[] = {
-		1,
-		10,
-		100,
-		1000,
-		10000,
-		100000,
-		1000000,
-		10000000,
-		100000000,
-		1000000000,
-		10000000000,
-		100000000000,
-		1000000000000,
-		10000000000000,
-		100000000000000,
-		1000000000000000,
-		10000000000000000,
-	};
-
 	return pow10[n];
 }
+
+#if __SIEVE__
+/* Assumes that number of digits has to be odd */
+static void generate_sieve(int digits)
+{
+	unsigned char mask = 0x7;
+	int count = 0, bytes;
+
+	while (count < digits) {
+		max = max * 10 + 9;
+		++count;
+	}
+	//printf("max: %llu\n", max);
+
+	max = (ull)sqrt(max) + 1;
+	//printf("sqrt: %llu\n", max);
+
+	/* We need half the space as multiples of 2 can be omitted */
+	bytes = (max >> 1) + (max & 0x1);
+	//printf("%d bits\n", bytes);
+
+	/* Calculate the actual number of bytes required */
+	bytes = (bytes >> 3) + (bytes & 0x1);
+	//printf("%d bytes\n", bytes);
+
+	/* Align-up to 16-byte */
+	bytes = ALIGN(bytes, 16);
+	//printf("%d bytes (16-byte aligned)\n", bytes);
+
+	psieve = realloc(psieve, bytes);
+	if (!psieve) {
+		printf("realloc() failed!\n");
+		exit(1);
+	}
+	memset(psieve, 0, bytes);
+
+	/* In psieve bit 0 -> 1, 1 -> 3, 2 -> 5, 3 -> 7 and so on... */
+	/* Set the 0th bit representing 1 to COMPOSITE */
+	psieve[0] |= COMPOSITE << (1 >> 1);
+
+	for (ull n = 3; n <= max; n += 2) {
+		if (((psieve[n >> 4] >> ((n  >> 1) & mask)) & 0x1) == PRIME) {
+			for (ull mul = (n << 1); mul < max; mul += n) {
+				/* Skip the evens, there's no representation in psieve */
+				if (!(mul & 0x1))
+					continue;
+
+				/* Check if already set, reduces performance */
+				//if (((psieve[mul >> 4] >> ((mul  >> 1) & mask)) & 0x1) == COMPOSITE)
+				//	continue;
+
+				/* Set offset of mul in psieve */
+				psieve[mul >> 4] |= COMPOSITE << ((mul >> 1) & mask); /* bit offset */
+			}
+		}
+	}
+}
+#endif
+
+#if 0
+/* Disabled as we are not calling this API */
+static void printsieve()
+{
+	unsigned char mask;
+	int count = 0;
+	ulong offset;
+	ull half_max = max >> 1;
+
+	printf("prime %d: %u\n", ++count, 2);
+
+	for (ull i = 0; i <= half_max; ++i) {
+		offset = i >> 3;
+		mask = i & 0x7;
+		if (((psieve[offset] >> mask) & 0x1) == PRIME) {
+			printf("prime %d: %llu\n", ++count, (i << 1) + 1);
+		}
+	}
+}
+#endif
 
 /* Convert long to ASCII */
 static char *ltoa(ull val, int base, int *len)
@@ -92,16 +195,31 @@ static int isdivisibleby3(char *buf, int len)
 	return 1;
 }
 
-/* Check if a number is prime.
-   _SKIP_s the check for every odd multiple of 3 */
+/* Check if a number is prime. */
 static int isprime(ull val)
 {
-	static ull i, root;
-	static ulong j, k;
-
 	/* Test for divisibility by 2 */
 	if (!(val & 0x1))
 		return 0;
+
+#if __SIEVE__
+	unsigned char mask;
+	ulong offset;
+	ull half_max = max >> 1;
+
+	/* We have already checked for divisibility by 2, 3, 5, start from 7 */
+	for (ull i = 3; i <= half_max; ++i) {
+		offset = i >> 3;
+		mask = i & 0x7;
+		if (((psieve[offset] >> mask) & 0x1) == PRIME)
+			if (!(val % ((i << 1) + 1)))
+				return 0;
+	}
+#else
+	/* Brute-force approach to determine prime */
+	/* _SKIP_s the check for every odd multiple of 3 and 5 */
+	static ull i, root;
+	static ulong j, k;
 
 	i = 7; /* divisibility by 3 has already been checked before calling this function */
 	j = 1; /* j can be 0, 1, 2; e.g.: 3 - set to 0, 5 - 1, 7 - 2, 9 - j found as 2 and reset */
@@ -127,6 +245,7 @@ static int isprime(ull val)
 		if (!(val % i))
 			return 0;
 	}
+#endif
 
 	return 1;
 }
@@ -239,10 +358,14 @@ int main()
 	int len = 0, oldlen;
 	char *buf = ltoa(i, 10, &len);
 
-	if (len < 13) {
+	if (len < __DIGITS__) {
 		printf("len: %d\n", len);
 		exit(1);
 	}
+
+#if __SIEVE__
+	generate_sieve(__DIGITS__);
+#endif
 
 	/* Uncomment the following code if starting from
 	   a non-palindrome. We started at 1000000000001. */
@@ -284,6 +407,11 @@ int main()
 		if (oldlen != len)
 			buf = ltoa(i, 10, &len);
 	}
+
+#if __SIEVE__
+	if (psieve)
+		free(psieve);
+#endif
 
 	return 0;
 }
