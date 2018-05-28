@@ -87,9 +87,7 @@ static ull sqrt_int_round(ull val)
 
 	// "one" starts at the highest power of four <= than the argument.
 	while (one > val)
-	{
 		one >>= 2;
-	}
 
 	while (one)
 	{
@@ -434,7 +432,7 @@ int main()
 	generate_sieve(__DIGITS__);
 #endif
 
-	/* Uncomment the following code if starting from
+	/* Enable the following code if starting from
 	   a non-palindrome. We started at 1000000000001. */
 #if __COMPLETE__
 	if (!ispalin(buf, len)) {
