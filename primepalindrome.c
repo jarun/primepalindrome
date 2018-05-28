@@ -62,7 +62,8 @@ static ull fastpow10(int n)
 }
 
 /* Convert long to ASCII */
-static char *ltoa(ull val, int base, int *len){
+static char *ltoa(ull val, int base, int *len)
+{
 	static int i;
 
 	i = 30;
@@ -74,23 +75,6 @@ static char *ltoa(ull val, int base, int *len){
 
 	return &ascbuf[++i];
 }
-
-#if __COMPLETE__
-/* Check if a number (converted to string) is palindrome */
-static int ispalin(char *buf, int len)
-{
-	midindex = (len >> 1) - 1;
-
-	while (midindex >= 0) {
-		if (buf[midindex] != buf[len - midindex - 1])
-			return 0;
-
-		--midindex;
-	}
-
-	return 1;
-}
-#endif
 
 /* Check if a number (converted to string) is divisible by 3 */
 static int isdivisibleby3(char *buf, int len)
@@ -193,6 +177,21 @@ static ull getnextpalin(char *buf, int *len)
 }
 
 #if __COMPLETE__
+/* Check if a number (converted to string) is palindrome */
+static int ispalin(char *buf, int len)
+{
+	midindex = (len >> 1) - 1;
+
+	while (midindex >= 0) {
+		if (buf[midindex] != buf[len - midindex - 1])
+			return 0;
+
+		--midindex;
+	}
+
+	return 1;
+}
+
 /* Generate the next palindrome after a NON-palindrome */
 static ull nonpalin2palin(char *buf, int len)
 {
@@ -240,7 +239,7 @@ int main()
 	int len = 0, oldlen;
 	char *buf = ltoa(i, 10, &len);
 
-	if (len < 11) {
+	if (len < 13) {
 		printf("len: %d\n", len);
 		exit(1);
 	}
