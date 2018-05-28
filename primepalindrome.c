@@ -248,6 +248,26 @@ static int isprime(ull val)
 			if (!(val % ((i << 1) + 1)))
 				return 0;
 	}
+
+#if 0
+	/* inconsistent - faster for 13 bits, slower with 15 bits */
+	static ull *quadbits, next, mask;
+	quadbits = (ull *)psieve;
+	next = 3; /* start at 7 (3 * 2 + 1) */
+	mask = 0x8; /* 7 is represented by bit 3 - 0b1000 */
+
+	for (; next <= half_max; ++quadbits, mask = 0x1) {
+		while (mask != 0x0) {
+			if ((*quadbits & mask) == PRIME)
+				if (!(val % ((next << 1) + 1)))
+					return 0;
+
+			mask <<= 1;
+			++next;
+		}
+	}
+#endif
+
 #else
 	/* Brute-force approach to determine prime */
 	/* _SKIP_s the check for every odd multiple of 3 and 5 */
