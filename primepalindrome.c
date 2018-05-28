@@ -5,7 +5,7 @@
  *
  * Benchmark on Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz:
  * - Brute: 3.75user 0.00system 0:03.75elapsed 100%CPU (0avgtext+0avgdata 1544maxresident)k
- * - Sieve: 7.70user 0.00system 0:07.70elapsed 100%CPU (0avgtext+0avgdata 1856maxresident)k
+ * - Sieve: 7.58user 0.00system 0:07.58elapsed 100%CPU (0avgtext+0avgdata 1508maxresident)k
  *
  * Author: Arun Prakash Jana <engineerarun@gmail.com>
  * Copyright (C) 2015 by Arun Prakash Jana <engineerarun@gmail.com>
@@ -24,7 +24,6 @@
  * along with primepalindrome.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,6 +70,36 @@ static ull max;
 #define ALIGN(x,a)              __ALIGN_MASK(x,(typeof(x))(a)-1)
 #endif
 
+static ull sqrt_int_round(ull val)
+{
+	ull res = 0;
+	ull one = (ull)1 << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
+
+	// "one" starts at the highest power of four <= than the argument.
+	while (one > val)
+	{
+		one >>= 2;
+	}
+
+	while (one)
+	{
+		if (val >= res + one)
+		{
+			val -= (res + one);
+			res += one << 1;
+		}
+
+		res >>= 1;
+		one >>= 2;
+	}
+
+	/* Do arithmetic rounding to nearest integer */
+	if (val > res)
+		++res;
+
+	return res;
+}
+
 static ull fastpow10(int n)
 {
 	if (n < 0 || n > 16) {
@@ -86,7 +115,12 @@ static ull fastpow10(int n)
 }
 
 #if __SIEVE__
-/* Assumes that number of digits has to be odd */
+/*
+ * Generates a table of prime numbers up to the maximum having digits.
+ * All even numbers (including 2) are ignored. Bit n in the bitmap
+ * represents the odd number (2n + 1). This enables the table to be
+ * half the size of a naive Sieve of Eratosthenes implementation.
+ */
 static void generate_sieve(int digits)
 {
 	unsigned char mask = 0x7;
@@ -98,7 +132,7 @@ static void generate_sieve(int digits)
 	}
 	//printf("max: %llu\n", max);
 
-	max = (ull)sqrt(max) + 1;
+	max = sqrt_int_round(max);
 	//printf("sqrt: %llu\n", max);
 
 	/* We need half the space as multiples of 2 can be omitted */
@@ -224,7 +258,7 @@ static int isprime(ull val)
 	i = 7; /* divisibility by 3 has already been checked before calling this function */
 	j = 1; /* j can be 0, 1, 2; e.g.: 3 - set to 0, 5 - 1, 7 - 2, 9 - j found as 2 and reset */
 	k = 0; /* k can be 0, 1, 2, 3, 4; e.g.: 5 - set to 0, 7 - 1, 9 - 2, 11 - 3, 13 - 4, 15 - k found as 4 and reset */
-	root = (ull) sqrt(val) + 1;
+	root = sqrt_int_round(val);
 
 	for (; i < root; i += 2) {
 		/* Trick to skip each 2nd multiple of 3 from 3: 9, 15, 21... */
