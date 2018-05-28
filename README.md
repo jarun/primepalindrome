@@ -1,7 +1,7 @@
 # PrimePalindrome
 
-A fast C program to calculate the 1500th prime palindrome with 15 digits.
-Why 15 (_odd_) digits? Because a palindromic number with even number of digits is always divisible by 11.
+A fast C program to calculate the 1500th prime palindrome with an odd number (default 15) of digits.
+Why _odd_? Because a palindromic number with even number of digits is always divisible by 11.
 
 Implements space-optimized Sieve of Eratosthenes (default) with GCC-specific hardware-aided `ffsll()`as well as brute force methods.
 
