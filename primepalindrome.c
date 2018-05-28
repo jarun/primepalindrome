@@ -64,7 +64,7 @@ static int midindex;
 
 #if __SIEVE__
 static unsigned char *psieve;
-static ull max;
+static ull max, half_max;
 
 #define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
 #define ALIGN(x,a)              __ALIGN_MASK(x,(typeof(x))(a)-1)
@@ -134,6 +134,7 @@ static void generate_sieve(int digits)
 
 	max = sqrt_int_round(max);
 	//printf("sqrt: %llu\n", max);
+	half_max = max >> 1;
 
 	/* We need half the space as multiples of 2 can be omitted */
 	bytes = (max >> 1) + (max & 0x1);
@@ -184,7 +185,6 @@ static void printsieve()
 	unsigned char mask;
 	int count = 0;
 	ulong offset;
-	ull half_max = max >> 1;
 
 	printf("prime %d: %u\n", ++count, 2);
 
@@ -237,14 +237,13 @@ static int isprime(ull val)
 		return 0;
 
 #if __SIEVE__
-	unsigned char mask;
-	ulong offset;
-	ull half_max = max >> 1;
+	static unsigned char mask;
+	static ulong offset;
 
 	/* We have already checked for divisibility by 2, 3, 5, start from 7 */
 	for (ull i = 3; i <= half_max; ++i) {
 		offset = i >> 3;
-		mask = i & 0x7;
+		mask = (unsigned char)i & 0x7;
 		if (((psieve[offset] >> mask) & 0x1) == PRIME)
 			if (!(val % ((i << 1) + 1)))
 				return 0;
