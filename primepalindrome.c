@@ -1,11 +1,18 @@
 /*
- * A fast C program to calculate the 1500th prime palindrome with 13 digits.
+ * A fast C program to calculate the 1500th prime palindrome with 15 digits.
  *
- * Implements brute-force and optimized Sieve of Eratosthenes method.
+ * Implements brute-force and optimized Sieve of Eratosthenes (default) method.
+ * Uses GCC-specific hardware-aided ffsll() to check prime bits in bitmap.
  *
- * Benchmark on Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz:
+ * Benchmark on Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+ * -----------------------------------------------------
+ * 13 digits [result: 1015834385101]
  * - Brute: 3.75user 0.00system 0:03.75elapsed 100%CPU (0avgtext+0avgdata 1544maxresident)k
- * - Sieve: 7.58user 0.00system 0:07.58elapsed 100%CPU (0avgtext+0avgdata 1508maxresident)k
+ * - Sieve: 2.80user 0.00system 0:02.80elapsed 99%CPU (0avgtext+0avgdata 1428maxresident)k
+ *
+ * 15 digits [result: 100191191191001]
+ * - Brute: 36.94user 0.00system 0:36.94elapsed 99%CPU (0avgtext+0avgdata 1208maxresident)k
+ * - Sieve: 23.94user 0.00system 0:23.94elapsed 100%CPU (0avgtext+0avgdata 3240maxresident)k
  *
  * Author: Arun Prakash Jana <engineerarun@gmail.com>
  * Copyright (C) 2015 by Arun Prakash Jana <engineerarun@gmail.com>
@@ -24,18 +31,21 @@
  * along with primepalindrome.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define __SIEVE__ 0 /* 0 - Brute Force, 1 - Sieve of Eratosthenes */
+#define __SIEVE__ 1 /* 0 - Brute Force, 1 - Sieve of Eratosthenes */
 #define __COMPLETE__ 0 /* Start from a non-palindrome and generate the next palindrome */
 
-#define __DIGITS__ 13
+#define __DIGITS__ 15
 #define __LIMIT__  1500
 
 #define PRIME 0
 #define COMPOSITE 1
+
+#define ffzll(x) ffsll(~(x))
 
 typedef unsigned long long ull;
 
@@ -237,6 +247,7 @@ static int isprime(ull val)
 		return 0;
 
 #if __SIEVE__
+#ifdef __SW_BITMAP_CHECK__
 	static unsigned char mask;
 	static ulong offset;
 
@@ -248,26 +259,29 @@ static int isprime(ull val)
 			if (!(val % ((i << 1) + 1)))
 				return 0;
 	}
+#else /* hardware ffs enabled */
+	static ull *pquadbits, quad, next, prev, i;
+	pquadbits = (ull *)psieve;
+	quad = ~*pquadbits & ~0b111;
+	prev = 0, next = 3; /* start at 7 (3 * 2 + 1) */
 
-#if 0
-	/* inconsistent - faster for 13 bits, slower with 15 bits */
-	static ull *quadbits, next, mask;
-	quadbits = (ull *)psieve;
-	next = 3; /* start at 7 (3 * 2 + 1) */
-	mask = 0x8; /* 7 is represented by bit 3 - 0b1000 */
-
-	for (; next <= half_max; ++quadbits, mask = 0x1) {
-		while (mask != 0x0) {
-			if ((*quadbits & mask) == PRIME)
-				if (!(val % ((next << 1) + 1)))
-					return 0;
-
-			mask <<= 1;
-			++next;
+	for (; prev <= half_max; quad = ~*++pquadbits) {
+		if (!quad) {
+			prev += 64;
+			continue;
 		}
+
+		while (quad) {
+			i = ffsll(quad) - 1;
+			next = prev + i;
+			if (!(val % ((next << 1) + 1)))
+				return 0;
+			quad &= ~((ull)0x1 << i);
+		}
+
+		prev += 64;
 	}
 #endif
-
 #else
 	/* Brute-force approach to determine prime */
 	/* _SKIP_s the check for every odd multiple of 3 and 5 */
@@ -407,7 +421,7 @@ static ull nonpalin2palin(char *buf, int len)
 int main()
 {
 	int count = __LIMIT__;
-	ull i = 1000000000001;
+	ull i = 100000000000001;
 	int len = 0, oldlen;
 	char *buf = ltoa(i, 10, &len);
 
