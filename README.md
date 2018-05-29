@@ -5,6 +5,8 @@ Why _odd_? Because a palindromic number with even number of digits is always div
 
 Implements space-optimized Sieve of Eratosthenes (default) with GCC-specific hardware-aided `ffsll()`as well as brute force methods.
 
+This program is also a demonstration of using efficient algorithms and C code-optimization.
+
 ## Execution time (brute force)
 
 /* On Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz */

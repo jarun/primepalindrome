@@ -42,11 +42,6 @@
 #define __DIGITS__ 15
 #define __LIMIT__  1500
 
-#define PRIME 0
-#define COMPOSITE 1
-
-#define ffzll(x) ffsll(~(x))
-
 typedef unsigned long long ull;
 
 static char const hexbuf[] = "0123456789abcdef";
@@ -78,7 +73,26 @@ static ull max, half_max;
 
 #define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
 #define ALIGN(x,a)              __ALIGN_MASK(x,(typeof(x))(a)-1)
+
+#define PRIME 0
+#define COMPOSITE !PRIME
+
+#define ffzll(x) ffsll(~(x))
 #endif
+
+static ull fastpow10(int n)
+{
+	if (n < 0 || n > 16) {
+#if __SIEVE__
+		if (psieve)
+			free(psieve);
+#endif
+		printf("n = %d\n", n);
+		exit(1);
+	}
+
+	return pow10[n];
+}
 
 static ull sqrt_int_round(ull val)
 {
@@ -106,20 +120,6 @@ static ull sqrt_int_round(ull val)
 		++res;
 
 	return res;
-}
-
-static ull fastpow10(int n)
-{
-	if (n < 0 || n > 16) {
-#if __SIEVE__
-		if (psieve)
-			free(psieve);
-#endif
-		printf("n = %d\n", n);
-		exit(1);
-	}
-
-	return pow10[n];
 }
 
 #if __SIEVE__
